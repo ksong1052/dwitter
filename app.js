@@ -8,7 +8,8 @@ import authRouter from './router/auth.js';
 import { config } from './config.js';
 import { initSocket } from './connection/socket.js';
 //import { db } from './db/database.js';
-import { sequelize } from './db/database.js';
+// import { sequelize } from './db/database.js';
+import { connectDB } from './db/mongodb.js';
 
 const app = express();
 
@@ -29,12 +30,20 @@ app.use((error, req, res, next) => {
   res.sendStatus(500);
 });
 
-// Sequelize사용
-sequelize.sync().then(() => {
+// // Sequelize사용
+// sequelize.sync().then(() => {
+//   /* Socket IO 설정 */ 
+//   const server = app.listen(config.host.port);
+//   initSocket(server);
+// });
+
+// MongoDB 사용
+connectDB().then(db => {
+  console.log('Init', db);
+  
   /* Socket IO 설정 */ 
   const server = app.listen(config.host.port);
   initSocket(server);
-});
-
-
+})
+.catch(console.error);
 
