@@ -30,17 +30,9 @@ app.use((error, req, res, next) => {
   res.sendStatus(500);
 });
 
-// // Sequelize사용
-// sequelize.sync().then(() => {
-//   /* Socket IO 설정 */ 
-//   const server = app.listen(config.host.port);
-//   initSocket(server);
-// });
-
 // MongoDB 사용
-connectDB().then(db => {
-  console.log('Init', db);
-  
+connectDB()
+  .then(() => {  
   /* Socket IO 설정 */ 
   const server = app.listen(config.host.port);
   initSocket(server);

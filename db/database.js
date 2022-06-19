@@ -1,3 +1,5 @@
+// ORM인 Sqquelize를 이용하여 Mysql에 연결
+
 import { config } from '../config.js';
 import SQ from 'sequelize';
 
