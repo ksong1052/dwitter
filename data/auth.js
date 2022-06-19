@@ -30,5 +30,5 @@ export async function createUser(user) {
 }
 
 function mapOptionalUser(user) {
-  return user ? { ...user, id: user._id } : user;
+  return user ? { ...user, id: user._id.toString() } : user;
 }

@@ -1,5 +1,8 @@
+import MongoDb from 'mongodb';
 import { getTweets } from '../db/mongodb.js';
 import * as userRepository from './auth.js';
+
+const ObjectId = MongoDb.ObjectId;
 
 export async function getAll() {
   return getTweets()
@@ -13,21 +16,17 @@ export async function getAll() {
 }
 
 export async function getAllByUsername(username) {
-  return Tweet.findAll({
-    ...INCLUDE_USER,
-    ...ORDER_DESC,    
-    include: {
-      ...INCLUDE_USER.include,
-      where: { username }
-    }
-  });
+  return getTweets()
+    .find({ username })
+    .sort({ createdAt: -1 })
+    .toArray()
+    .then(mapTweets);
 }
 
 export async function getById(id) {
-  return Tweet.findOne({
-    ...INCLUDE_USER,    
-    where: { id }    
-  });
+  return getTweets()
+    .findOne({ _id: new ObjectId(id) })
+    .then(mapOptionalTweet);
 }
 
 export async function create(text, userId) {
@@ -43,22 +42,34 @@ export async function create(text, userId) {
   return getTweets()
     .insertOne(tweet)
     .then((data) => {
-      console.log(data);
-      return data;
+      const newTweet = mapOptionalTweet({ ...tweet, _id: data.insertedId });
+      console.log(newTweet);
+      return newTweet;
     });
 }
 
+//  { returnDocument: 'after' } => 이 옵션을 줘야 update된 data를 return해 준다.
 export async function update(id, text) {
-  return Tweet.findByPk(id, INCLUDE_USER)
-    .then((tweet) => {
-      tweet.text = text;
-      return tweet.save();
-    });
+  return getTweets()
+    .findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { text: text } },
+      { returnDocument: 'after' }
+    )
+    .then(result => result.value)
+    .then(mapOptionalTweet)
 }
 
 export async function remove(id) {
-  return Tweet.findByPk(id)
-    .then((tweet) => {
-      tweet.destroy();
-    });
+  return getTweets()
+    .deleteOne({ _id: new ObjectId(id) });
+}
+
+function mapOptionalTweet(tweet) {
+  return tweet ? { ...tweet, id: tweet._id.toString() } : tweet;
+}
+
+function mapTweets(tweets){
+  // return tweets.map(tweet => mapOptionalTweet(tweet));
+  return tweets.map(mapOptionalTweet);  // 위와 같은 의미 => 인자가 같으면 모두 생략 가능
 }
