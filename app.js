@@ -33,6 +33,8 @@ app.use((error, req, res, next) => {
 // MongoDB 사용
 connectDB()
   .then(() => {  
+  console.log('MongoDB connected successfully !');
+
   /* Socket IO 설정 */ 
   const server = app.listen(config.host.port);
   initSocket(server);
