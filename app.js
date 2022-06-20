@@ -11,11 +11,16 @@ import { initSocket } from './connection/socket.js';
 // import { sequelize } from './db/database.js';
 import { connectDB } from './db/mongodb.js';
 
+const corsOption = {
+  origin: config.cors.allowedOrigin,
+  optionsSuccessStatus: 200,
+};
+
 const app = express();
 
 app.use(express.json());
 app.use(helmet());
-app.use(cors());
+app.use(cors(corsOption));
 app.use(morgan('tiny'));
 
 app.use('/tweets', tweetsRouter);
@@ -36,7 +41,9 @@ connectDB()
   console.log('MongoDB connected successfully !');
 
   /* Socket IO 설정 */ 
-  const server = app.listen(config.host.port);
+  const server = app.listen(config.port, () => {
+    console.log(`Server is running on ${config.port}`);
+  });
   initSocket(server);
 })
 .catch(console.error);
